@@ -73,7 +73,7 @@ public:
       float new_angle = rand_float(-45 * PI / 180, 45 * PI / 180);
       direction.x = cos(new_angle);
       direction.y = sin(new_angle);
-      position.x += 10.1;
+      position.x += 0.1;
     }
     if (ball.getGlobalBounds().intersects(
             player2.get_shape().getGlobalBounds())) {
@@ -81,7 +81,7 @@ public:
       direction.x = cos(new_angle);
       direction.y = sin(new_angle);
 
-      position.x -= 10.1;
+      position.x -= 0.1;
     }
     if (position.x <= 25) {
       player1.restart_position();
