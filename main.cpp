@@ -53,7 +53,7 @@ public:
     ball.setRadius(15);
     position.x = x;
     position.y = y;
-    float angle = rand_float(0, 360);
+    float angle = rand_float(0, 360 * PI/180);
     direction.x = sin(angle);
     direction.y = cos(angle);
   }
@@ -77,7 +77,7 @@ public:
     }
     if (ball.getGlobalBounds().intersects(
             player2.get_shape().getGlobalBounds())) {
-      float new_angle = rand_float(135 * PI / 180, 180 * PI / 180);
+      float new_angle = rand_float(135 * PI / 180, 225 * PI / 180);
       direction.x = cos(new_angle);
       direction.y = sin(new_angle);
 
@@ -86,9 +86,9 @@ public:
     if (position.x <= 25) {
       player1.restart_position();
       player2.restart_position();
-      float angle = rand_float(0, 2 * PI);
-      direction.x = sin(angle);
-      direction.y = cos(angle);
+      float new_angle = rand_float(-45 * PI / 180, 45 * PI / 180);
+      direction.x = cos(new_angle);
+      direction.y = sin(new_angle);
       position.x = 500;
       position.y = 350;
       player2.score++;
@@ -96,9 +96,9 @@ public:
     if (position.x >= 950) {
       player1.restart_position();
       player2.restart_position();
-      float angle = rand_float(0, 2 * PI);
-      direction.x = sin(angle);
-      direction.y = cos(angle);
+      float new_angle = rand_float(135 * PI / 180, 225 * PI / 180);
+      direction.x = cos(new_angle);
+      direction.y = sin(new_angle);
       position.x = 500;
       position.y = 350;
       player1.score++;
