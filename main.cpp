@@ -53,7 +53,7 @@ public:
     ball.setRadius(15);
     position.x = x;
     position.y = y;
-    float angle = rand_float(0, 360 * PI/180);
+    float angle = rand_float(0, 360 * PI / 180);
     direction.x = sin(angle);
     direction.y = cos(angle);
   }
@@ -139,7 +139,7 @@ int main() {
 
   sf::RectangleShape right_border_line;
   right_border_line.setSize(sf::Vector2f(10, 700));
-  right_border_line.setPosition(985, 0);
+  right_border_line.setPosition(990, 0);
 
   player1.update_position();
   player2.update_position();
