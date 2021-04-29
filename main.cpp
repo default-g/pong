@@ -47,16 +47,15 @@ public:
   sf::CircleShape ball;
   sf::Vector2f position;
   sf::Vector2f direction;
-  float move_speed = 5;
+  float move_speed = 7;
   Ball(float x, float y) {
     ball.setFillColor(sf::Color::Red);
     ball.setRadius(15);
     position.x = x;
     position.y = y;
-    srand(time(NULL));
     float angle = rand_float(0, 2 * PI);
-    direction.x = sin(angle);
-    direction.y = cos(angle);
+    direction.x = cos(angle);
+    direction.y = sin(angle);
   }
   void move() {
     position.x += direction.x * move_speed;
@@ -71,12 +70,13 @@ public:
     }
     if (ball.getGlobalBounds().intersects(
             player1.get_shape().getGlobalBounds())) {
-      direction.x *= -1;
+      direction.x = cos(rand_float(PI/4, -PI/4));
       position.x += 10.1;
     }
     if (ball.getGlobalBounds().intersects(
             player2.get_shape().getGlobalBounds())) {
-      direction.x *= -1;
+       direction.x = cos(rand_float((3 * PI)/4, (5*PI)/4));
+       
       position.x -= 10.1;
     }
     if (position.x <= 25) {
@@ -108,7 +108,7 @@ int main() {
   sf::Music music;
   if (!music.openFromFile("music.ogg"))
     return -1; // error
-
+  srand(time(NULL));
   music.play();
   music.setLoop(true);
   sf::Font font;
