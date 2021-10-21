@@ -1,6 +1,8 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 #include <cmath>
+#include <iostream>
+
 #define PI 3.14159265
 
 float rand_float(float a, float b) {
@@ -38,16 +40,103 @@ class Object{
       this->shape->setPosition(position);
     };
 
-    const sf::Shape *getShape(){
+    Object(const Object& obj) {
+      this->shape = obj.shape;
+      this->color = obj.color;
+      this->position = obj.position;
+    }
+
+    const sf::Shape *get_shape(){
       return shape;
     };
+
+    sf::Color get_color(){
+      return shape->getFillColor();
+    };
+
+    sf::Vector2f get_position(){
+      return shape->getPosition();
+    };
+
 };
 
 class MovableObject: public Object {
+
   protected:
+    MovableObject(float x, float y, sf::Color color = sf::Color::White, sf::Shape *shape = new sf::RectangleShape(sf::Vector2f(10, 10))): Object(x, y, color, shape){
+      start_position = position;
+    };
+    virtual void move() = 0;
     virtual void update_position() = 0;
+
     float speed;
+    sf::Vector2f start_position;
     sf::Vector2f direction;
+
+    sf::Vector2f get_direction() {
+      return direction;
+    };
+
+    float get_speed() {
+      return speed;
+    };
+
+    sf::Vector2f get_start_position(){
+      return start_position;
+    }   
+};
+
+class newPlayer: public MovableObject {
+  private:
+
+  int score = 0;
+
+  void move() { return; };
+
+  public:
+
+  newPlayer(float x, float y, float speed, sf::Color color = sf::Color::White):  MovableObject(x, y, color, new RectangleShape(sf::Vector2f(20, 100))) {
+    this->speed = speed;
+  };
+
+    void move_down() {
+      this->position.y += this->speed;
+    };
+
+    void move_up() {
+      this->position.y -= this->speed;
+    };
+
+    void update_position() {
+      if (this->position.y < 0)
+      this->position.y = 0;
+
+      if (this->position.y > 600)
+      this->position.y = 600;
+      this->shape->setPosition(this->position);
+    };
+
+    void reset_position(){
+      this->position = this->start_position;
+    }
+
+    int get_score(){
+      return this->score;
+    };
+
+    void plus_score(){
+      this->score++;
+    };
+
+};
+
+class newBall: public MovableObject{
+
+  public:
+
+    newBall(float x, float y, sf::Color color = sf::Color::Red): MovableObject(x, y, color, new CircleShape(15)) {};
+
+
 };
 
 class Player {
@@ -150,10 +239,7 @@ public:
 };
 
 int main() {
-  sf::CircleShape cir(10);
-  cir.setFillColor (sf::Color::Magenta);
-  Object obj(new sf::CircleShape(cir));
-
+  newPlayer plr(50, 100, 5);
 
   sf::Music music;
   if (!music.openFromFile("music.ogg"))
@@ -176,7 +262,7 @@ int main() {
   window.setFramerateLimit(60);
 
 
-  Object gameFieldElements[3] {
+  Object gameFieldElements[] {
     Object(0, 0, sf::Color::White, new sf::RectangleShape(sf::Vector2f(10, 700))),
     Object(500, 0, sf::Color::White, new sf::RectangleShape(sf::Vector2f(10, 700))),
     Object(990, 0, sf::Color::White, new sf::RectangleShape(sf::Vector2f(10, 700)))
@@ -201,6 +287,8 @@ int main() {
     }
     if (Keyboard::isKeyPressed(Keyboard::Down)) {
       player2.move_down();
+      plr.move_up();
+      plr.update_position();
       player2.update_position();
     }
     if (Keyboard::isKeyPressed(sf::Keyboard::W)) {
@@ -222,13 +310,13 @@ int main() {
     window.draw(player1.get_shape());
     window.draw(player2.get_shape());
     for(int i = 0; i < 3; i++){
-      window.draw(*gameFieldElements[i].getShape());
+      window.draw(*gameFieldElements[i].get_shape());
     };
     window.draw(ball.get_shape());
     window.draw(score1);
     window.draw(score2);
 
-    window.draw(*obj.getShape());
+    window.draw(*plr.get_shape());
 
     window.display();
   }
