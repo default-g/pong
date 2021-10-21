@@ -9,6 +9,47 @@ float rand_float(float a, float b) {
 
 using namespace sf;
 
+class Object{
+
+  protected:
+
+    sf::Color color;
+    sf::Vector2f position;
+    sf::Shape *shape;
+
+  public:
+
+    Object(): position(sf::Vector2f(0, 0)), color(sf::Color::White) {
+      this->shape = new sf::RectangleShape(sf::Vector2f(10, 10));
+      shape->setFillColor(color);
+      shape->setPosition(position);
+    };
+
+    Object(sf::Shape *shape) : shape(shape){
+      position = shape->getPosition();
+      color = shape->getFillColor();
+    };
+
+    Object(float x, float y, sf::Color color = sf::Color::White, sf::Shape *shape = new sf::RectangleShape(sf::Vector2f(10, 10))) {
+      this->position = sf::Vector2f(x, y);
+      this->color = color;
+      this->shape = shape;
+      this->shape->setFillColor(color);
+      this->shape->setPosition(position);
+    };
+
+    const sf::Shape *getShape(){
+      return shape;
+    };
+};
+
+class MovableObject: public Object {
+  protected:
+    virtual void update_position() = 0;
+    float speed;
+    sf::Vector2f direction;
+};
+
 class Player {
 public:
   Player(float x, float y) {
@@ -109,6 +150,11 @@ public:
 };
 
 int main() {
+  sf::CircleShape cir(10);
+  cir.setFillColor (sf::Color::Magenta);
+  Object obj(new sf::CircleShape(cir));
+
+
   sf::Music music;
   if (!music.openFromFile("music.ogg"))
     return -1; // error
@@ -129,18 +175,13 @@ int main() {
   window.setVerticalSyncEnabled(true);
   window.setFramerateLimit(60);
 
-  RectangleShape line;
-  line.setSize(sf::Vector2f(10, 700));
-  line.setPosition(500, 0);
 
-  sf::RectangleShape left_border_line;
-  left_border_line.setSize(sf::Vector2f(10, 700));
-  left_border_line.setPosition(0, 0);
-
-  sf::RectangleShape right_border_line;
-  right_border_line.setSize(sf::Vector2f(10, 700));
-  right_border_line.setPosition(990, 0);
-
+  Object gameFieldElements[3] {
+    Object(0, 0, sf::Color::White, new sf::RectangleShape(sf::Vector2f(10, 700))),
+    Object(500, 0, sf::Color::White, new sf::RectangleShape(sf::Vector2f(10, 700))),
+    Object(990, 0, sf::Color::White, new sf::RectangleShape(sf::Vector2f(10, 700)))
+  };
+  
   player1.update_position();
   player2.update_position();
 
@@ -180,12 +221,14 @@ int main() {
 
     window.draw(player1.get_shape());
     window.draw(player2.get_shape());
-    window.draw(line);
-    window.draw(left_border_line);
-    window.draw(right_border_line);
+    for(int i = 0; i < 3; i++){
+      window.draw(*gameFieldElements[i].getShape());
+    };
     window.draw(ball.get_shape());
     window.draw(score1);
     window.draw(score2);
+
+    window.draw(*obj.getShape());
 
     window.display();
   }
