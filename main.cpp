@@ -39,15 +39,19 @@ public:
     ((sf::Shape *)(this->shape))->setPosition(position);
   };
 
-  Object(const Object &obj) {
-    this->shape = obj.shape;
-    this->color = obj.color;
-    this->position = obj.position;
+  const sf::Drawable *get_shape() { return this->shape; };
+
+  void set_shape(sf::Drawable *shape) {
+    this->shape = shape;
+    this->color = ((sf::Shape *)(this->shape))->getFillColor();
+    this->position = ((sf::Shape *)(this->shape))->getPosition();
   }
+  sf::Color get_color() { return this->color; };
 
-  const sf::Drawable *get_shape() { return shape; };
-
-  sf::Color get_color() { return ((sf::Shape *)shape)->getFillColor(); };
+  void set_color(sf::Color color) {
+    this->color = color;
+    ((sf::Shape *)(shape))->setFillColor(color);
+  }
 
   sf::Vector2f get_position() { return ((sf::Shape *)shape)->getPosition(); };
 
@@ -109,27 +113,33 @@ protected:
   sf::Vector2f direction;
 
 public:
-  sf::Vector2f set_direction(float x, float y) {
+  void set_direction(sf::Vector2f direction) { this->direction = direction; };
+
+  void set_direction(float x, float y) {
     this->direction = sf::Vector2f(x, y);
   };
 
   sf::Vector2f get_direction() { return direction; };
 
-  float get_speed() { return speed; };
+  float get_speed() { return this->speed; };
+
+  void set_speed(float speed) { this->speed = speed; };
 
   sf::Vector2f get_start_position() { return start_position; };
 
-  void reset_position() { this->position = this->start_position; }
+  void reset_position() {
+    this->position = this->start_position;
+    ((sf::Shape *)(shape))->setPosition(position);
+  }
 };
 
-class newPlayer : public MovableObject {
+class Player : public MovableObject {
 private:
   int score;
-
   void move() { return; };
 
 public:
-  newPlayer(float x, float y, float speed, sf::Color color = sf::Color::White)
+  Player(float x, float y, float speed, sf::Color color = sf::Color::White)
       : MovableObject(x, y, color, new RectangleShape(sf::Vector2f(20, 100))) {
     this->speed = speed;
     this->score = 0;
@@ -153,12 +163,12 @@ public:
   void plus_score() { this->score++; };
 };
 
-class newBall : public MovableObject {
+class Ball : public MovableObject {
 private:
   void update_position(){};
 
 public:
-  newBall(float x, float y, float speed, sf::Color color = sf::Color::Red)
+  Ball(float x, float y, float speed, sf::Color color = sf::Color::Red)
       : MovableObject(x, y, color, new CircleShape(15)) {
     this->speed = speed;
     float angle = rand_float(0, 360 * PI / 180);
@@ -170,7 +180,7 @@ public:
                             position.y + direction.y * speed);
   };
 
-  void update_position(newPlayer &player1, newPlayer &player2) {
+  void update_position(Player &player1, Player &player2) {
     if (position.y < 0) {
       direction.y *= -1;
     }
@@ -222,7 +232,7 @@ public:
 
 int main() {
 
-  newPlayer players[] = {newPlayer(50, 250, 5), newPlayer(925, 250, 5)};
+  Player players[] = {Player(50, 250, 5), Player(925, 250, 5)};
 
   sf::Music music;
   if (!music.openFromFile("music.ogg"))
@@ -246,7 +256,7 @@ int main() {
       Object(990, 0, sf::Color::White,
              new sf::RectangleShape(sf::Vector2f(10, 700)))};
 
-  newBall ball(500, 350, 10);
+  Ball ball(500, 350, 8);
 
   while (window.isOpen()) {
     scores[0].set_value(players[0].get_score());
@@ -292,6 +302,5 @@ int main() {
 
     window.display();
   }
-
   return 0;
 }
