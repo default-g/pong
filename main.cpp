@@ -287,7 +287,6 @@ int main() {
     }
     ball.move();
     ball.update_position(players[0], players[1]);
-
     window.clear();
 
     for (int i = 0; i < 3; i++) {
@@ -299,7 +298,6 @@ int main() {
       window.draw(*players[i].get_shape());
     }
     window.draw(*ball.get_shape());
-
     window.display();
   }
   return 0;
