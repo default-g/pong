@@ -99,12 +99,13 @@ public:
 class MovableObject : public Object {
 
 protected:
-  MovableObject(float x, float y, sf::Color color = sf::Color::White,
+  MovableObject(float x, float y, float speed = 0, sf::Color color = sf::Color::White,
                 sf::Drawable *shape = new sf::RectangleShape(sf::Vector2f(10,
                                                                           10)))
-      : Object(x, y, color, shape) {
-    this->start_position = position;
-  };
+      : Object(x, y, color, shape),
+        speed(speed),
+        start_position(position)
+        {};
   virtual void move() = 0;
   virtual void update_position() = 0;
 
@@ -136,20 +137,17 @@ public:
 class Player : public MovableObject {
 private:
   int score;
-  void move() { return; };
+  void move() override { return; };
 
 public:
   Player(float x, float y, float speed, sf::Color color = sf::Color::White)
-      : MovableObject(x, y, color, new RectangleShape(sf::Vector2f(20, 100))) {
-    this->speed = speed;
-    this->score = 0;
-  };
+      : MovableObject(x, y, speed, color, new RectangleShape(sf::Vector2f(20, 100))), score(0) {};
 
   void move_down() { this->position.y += this->speed; };
 
   void move_up() { this->position.y -= this->speed; };
 
-  void update_position() {
+  void update_position() override {
     if (this->position.y < 0)
       this->position.y = 0;
 
@@ -158,24 +156,23 @@ public:
     ((sf::Shape *)(this->shape))->setPosition(this->position);
   };
 
-  int get_score() { return this->score; };
+  const int get_score() { return this->score; };
 
   void plus_score() { this->score++; };
 };
 
 class Ball : public MovableObject {
 private:
-  void update_position(){};
+  void update_position() override{};
 
 public:
   Ball(float x, float y, float speed, sf::Color color = sf::Color::Red)
-      : MovableObject(x, y, color, new CircleShape(15)) {
-    this->speed = speed;
+      : MovableObject(x, y, speed, color, new CircleShape(15)) {
     float angle = rand_float(0, 360 * PI / 180);
     direction = sf::Vector2f(sin(angle), cos(angle));
   };
 
-  void move() {
+  void move() override {
     position = sf::Vector2f(position.x + direction.x * speed,
                             position.y + direction.y * speed);
   };
