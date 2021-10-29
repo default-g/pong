@@ -46,6 +46,7 @@ public:
     this->color = ((sf::Shape *)(this->shape))->getFillColor();
     this->position = ((sf::Shape *)(this->shape))->getPosition();
   }
+
   sf::Color get_color() { return this->color; };
 
   void set_color(sf::Color color) {
@@ -93,20 +94,27 @@ public:
     ((sf::Text *)(this->shape))->setString(this->value);
   };
 
+  sf::Font get_font() { return this->font; };
+
+  void set_font(sf::Font font) {
+    this->font = font;
+    ((sf::Text *)(this->shape))->setFont(this->font);
+  };
+
   std::string get_value() { return this->value; };
 };
 
 class MovableObject : public Object {
 
 protected:
-  MovableObject(float x, float y, float speed = 0, sf::Color color = sf::Color::White,
+  MovableObject(float x, float y, float speed = 0,
+                sf::Color color = sf::Color::White,
                 sf::Drawable *shape = new sf::RectangleShape(sf::Vector2f(10,
                                                                           10)))
-      : Object(x, y, color, shape),
-        speed(speed),
-        start_position(position)
-        {};
+      : Object(x, y, color, shape), speed(speed), start_position(position){};
+
   virtual void move() = 0;
+
   virtual void update_position() = 0;
 
   float speed;
@@ -122,7 +130,7 @@ public:
 
   sf::Vector2f get_direction() { return direction; };
 
-  float get_speed() { return this->speed; };
+  float get_speed() const { return this->speed; };
 
   void set_speed(float speed) { this->speed = speed; };
 
@@ -131,17 +139,19 @@ public:
   void reset_position() {
     this->position = this->start_position;
     ((sf::Shape *)(shape))->setPosition(position);
-  }
+  };
 };
 
 class Player : public MovableObject {
 private:
   int score;
-  void move() override { return; };
+  void move() override{};
 
 public:
   Player(float x, float y, float speed, sf::Color color = sf::Color::White)
-      : MovableObject(x, y, speed, color, new RectangleShape(sf::Vector2f(20, 100))), score(0) {};
+      : MovableObject(x, y, speed, color,
+                      new RectangleShape(sf::Vector2f(20, 100))),
+        score(0){};
 
   void move_down() { this->position.y += this->speed; };
 
@@ -156,7 +166,7 @@ public:
     ((sf::Shape *)(this->shape))->setPosition(this->position);
   };
 
-  const int get_score() { return this->score; };
+  int get_score() const { return this->score; };
 
   void plus_score() { this->score++; };
 };
@@ -228,73 +238,72 @@ public:
 };
 
 int main() {
-
-  Player players[] = {Player(50, 250, 5), Player(925, 250, 5)};
+  srand(time(NULL));
+  Object **game_field_objects = new Object *[8];
+  game_field_objects[0] = new Object(
+      0, 0, sf::Color::White, new sf::RectangleShape(sf::Vector2f(10, 700)));
+  game_field_objects[1] = new Object(
+      500, 0, sf::Color::White, new sf::RectangleShape(sf::Vector2f(10, 700)));
+  game_field_objects[2] = new Object(
+      990, 0, sf::Color::White, new sf::RectangleShape(sf::Vector2f(10, 700)));
+  game_field_objects[3] = new Player(50, 250, 5);
+  game_field_objects[4] = new Player(925, 250, 5);
+  game_field_objects[5] =
+      new ScoreText(((Player *)(game_field_objects[3]))->get_score(), 250, 20);
+  game_field_objects[6] =
+      new ScoreText(((Player *)(game_field_objects[4]))->get_score(), 750, 20);
+  game_field_objects[7] = new Ball(500, 350, 8);
 
   sf::Music music;
   if (!music.openFromFile("music.ogg"))
     return -1; // error
-  srand(time(NULL));
+
   music.play();
   music.setLoop(true);
   sf::Font font;
-  ScoreText scores[] = {ScoreText(players[0].get_score(), 250, 20),
-                        ScoreText(players[1].get_score(), 750, 20)};
 
   sf::RenderWindow window(sf::VideoMode(1000, 700), "Pong");
   window.setVerticalSyncEnabled(true);
   window.setFramerateLimit(60);
-
-  Object game_field_elements[] = {
-      Object(0, 0, sf::Color::White,
-             new sf::RectangleShape(sf::Vector2f(10, 700))),
-      Object(500, 0, sf::Color::White,
-             new sf::RectangleShape(sf::Vector2f(10, 700))),
-      Object(990, 0, sf::Color::White,
-             new sf::RectangleShape(sf::Vector2f(10, 700)))};
-
-  Ball ball(500, 350, 8);
-
   while (window.isOpen()) {
-    scores[0].set_value(players[0].get_score());
-    scores[1].set_value(players[1].get_score());
+    ((ScoreText *)(game_field_objects[5]))
+        ->set_value(((Player *)(game_field_objects[3]))->get_score());
+    ((ScoreText *)(game_field_objects[6]))
+        ->set_value(((Player *)(game_field_objects[4]))->get_score());
     sf::Event event;
     while (window.pollEvent(event)) {
       if (event.type == sf::Event::Closed)
         window.close();
     }
     if (Keyboard::isKeyPressed(sf::Keyboard::W)) {
-      players[0].move_up();
-      players[0].update_position();
+      ((Player *)(game_field_objects[3]))->move_up();
+      ((Player *)(game_field_objects[3]))->update_position();
     }
     if (Keyboard::isKeyPressed(sf::Keyboard::S)) {
-      players[0].move_down();
-      players[0].update_position();
+      ((Player *)(game_field_objects[3]))->move_down();
+      ((Player *)(game_field_objects[3]))->update_position();
     }
     if (Keyboard::isKeyPressed(Keyboard::Up)) {
-      players[1].move_up();
-      players[1].update_position();
+      ((Player *)(game_field_objects[4]))->move_up();
+      ((Player *)(game_field_objects[4]))->update_position();
     }
     if (Keyboard::isKeyPressed(Keyboard::Down)) {
-      players[1].move_down();
-      players[1].update_position();
+      ((Player *)(game_field_objects[4]))->move_down();
+      ((Player *)(game_field_objects[4]))->update_position();
     }
     if (Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
       window.close();
     }
-    ball.move();
-    ball.update_position(players[0], players[1]);
+    ((Ball *)(game_field_objects[7]))->move();
+    ((Ball *)(game_field_objects[7]))
+        ->update_position(*((Player *)game_field_objects[3]),
+                          *((Player *)game_field_objects[4]));
     window.clear();
 
-    for (int i = 0; i < 3; i++) {
-      window.draw(*game_field_elements[i].get_shape());
-    };
-    for (int i = 0; i < 2; i++) {
-      window.draw(*scores[i].get_shape());
-      players[i].update_position();
-      window.draw(*players[i].get_shape());
+    for (int i = 0; i < 8; i++) {
+      window.draw(*game_field_objects[i]->get_shape());
     }
-    window.draw(*ball.get_shape());
+
     window.display();
   }
   return 0;
